@@ -72,7 +72,8 @@ const materiais = {
 
 function App() {
   
-  console.log('API_URL =', process.env.NEXT_PUBLIC_API_URL);
+  console.log('API_URL =', process.env.REACT_APP_API_URL);
+  
   
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
