@@ -143,9 +143,17 @@ const MaterialItem = styled.li`
 
 const MaterialForm = styled.form`
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: stretch;
+  }
 `;
+
 
 const MaterialName = styled.span`
   flex: 1;
