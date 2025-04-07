@@ -8,38 +8,37 @@ const PreviewPedido = ({ formData, itens, voltar, removerItem }) => {
     window.location.reload();
   };
   
-  const API_URL = process.env.REACT_APP_API_URL || 'https://perfilx-bot.onrender.com';
-  console.log('🔍 API_URL usada:', API_URL);
+const API_URL = 'https://perfilx-bot.onrender.com';
+console.log('🔍 API_URL usada:', API_URL);
 
-  const enviarParaTelegram = async () => {
-    try {
-      const response = await fetch(`${API_URL}/enviar-pedido`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'PRe' // Chave deve ser igual à do servidor
-        },
-        body: JSON.stringify({
-          contrato: formData.contrato,
-          encarregado: formData.encarregado,
-          obra: formData.obra,
-          solicitante: formData.solicitante,
-          materiais: itens
-        })
-      });
+const enviarParaTelegram = async () => {
+  try {
+    const response = await fetch(`${API_URL}/enviar-pedido`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'PRe' // Chave deve ser igual à do servidor
+      },
+      body: JSON.stringify({
+        contrato: formData.contrato,
+        encarregado: formData.encarregado,
+        obra: formData.obra,
+        solicitante: formData.solicitante,
+        materiais: itens
+      })
+    });
 
-      const data = await response.json();
-      if (data.success) {
-        alert('✅ Pedido enviado ao grupo do Telegram!');
-        resetarFluxo();
-      } else {
-        alert('❌ Falha no envio: ' + (data.error || 'Erro desconhecido'));
-      }
-    } catch (error) {
-      alert('❌ Erro na conexão: ' + error.message);
+    const data = await response.json();
+    if (data.success) {
+      alert('✅ Pedido enviado ao grupo do Telegram!');
+      resetarFluxo();
+    } else {
+      alert('❌ Falha no envio: ' + (data.error || 'Erro desconhecido'));
     }
-  };
-
+  } catch (error) {
+    alert('❌ Erro na conexão: ' + error.message);
+  }
+};
 
   return (
     <PreviewContainer>
