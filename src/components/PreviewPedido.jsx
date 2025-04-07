@@ -120,6 +120,12 @@ const PreviewTitle = styled.h2`
 const InfoGroup = styled.div`
   display: flex;
   margin-bottom: 1rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 500px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 `;
 
 const InfoLabel = styled.span`
@@ -195,9 +201,15 @@ const DeleteButton = styled.button`
 
 const BotoesContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   margin-top: 2rem;
+
+  @media (max-width: 500px) {
+    flex-direction: column;
+  }
 `;
+
 
 const VoltarButton = styled.button`
   background-color: ${({ theme }) => theme.colors.textMuted};
