@@ -8,7 +8,7 @@ const PreviewPedido = ({ formData, itens, voltar, removerItem }) => {
     window.location.reload();
   };
   
-const API_URL = 'https://perfilx-bot.onrender.com';
+const API_URL = '/api/enviar-pedido'
 console.log('🔍 API_URL usada:', API_URL);
 
 const enviarParaTelegram = async () => {
