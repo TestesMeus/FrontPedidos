@@ -71,10 +71,7 @@ const materiais = {
 };
 
 function App() {
-  
-  console.log('🔍 API_URL usada:', API_URL);
-  
-  
+
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     contrato: "",
