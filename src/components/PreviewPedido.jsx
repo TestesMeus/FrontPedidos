@@ -8,7 +8,8 @@ const PreviewPedido = ({ formData, itens, voltar, removerItem }) => {
     window.location.reload();
   };
   
-  const API_URL = process.env.REACT_APP_API_URL || 'https://pedidos-marica.vercel.app/api';
+  const API_URL = process.env.REACT_APP_API_URL || 'https://perfilx-bot.onrender.com';
+  console.log('🔍 API_URL usada:', API_URL);
 
   const enviarParaTelegram = async () => {
     try {
@@ -38,6 +39,7 @@ const PreviewPedido = ({ formData, itens, voltar, removerItem }) => {
       alert('❌ Erro na conexão: ' + error.message);
     }
   };
+
 
   return (
     <PreviewContainer>
