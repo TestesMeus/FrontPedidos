@@ -13,7 +13,7 @@ console.log('🔍 API_URL usada:', API_URL);
 
 const enviarParaTelegram = async () => {
   try {
-    const response = await fetch(`${API_URL}/enviar-pedido`, {
+    const response = await fetch(`${API_URL}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
