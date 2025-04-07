@@ -72,7 +72,7 @@ const materiais = {
 
 function App() {
   
-  console.log('API_URL =', process.env.REACT_APP_API_URL);
+  console.log('🔍 API_URL usada:', API_URL);
   
   
   const [step, setStep] = useState(1);
