@@ -1,49 +1,48 @@
-const TelegramBot = require('node-telegram-bot-api');
-
-const TOKEN = '7676057131:AAELLtx8nzc4F1_PbMGxE-7R3sCvM1lufdM'; // 🔐 Use direto
-const API_KEY = 'PRe'; // Autorização simples
-
-const contratosToChatId = {
-  "117/2023 - Esporte Maricá": "-4765938730",
-  "267/2023 - Predial Maricá": "-1002652489871",
-  "222/2023 - Escolas Maricá": "-4628790026",
-  "10/2021 - Eletricá Predial": "-4653709864"
-};
-
-const bot = new TelegramBot(TOKEN, { polling: false });
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
-  if (req.headers['authorization'] !== API_KEY) {
-    return res.status(403).json({ error: 'Acesso não autorizado' });
-  }
-
   const { contrato, encarregado, obra, solicitante, materiais } = req.body;
 
-  const contratoLimpo = contrato?.trim();
-  const chatId = contratosToChatId[contratoLimpo];
-
-  if (!chatId) {
-    return res.status(400).json({ error: 'Contrato não encontrado ou sem grupo associado' });
+  if (!contrato || !encarregado || !obra || !solicitante || !materiais || materiais.length === 0) {
+    return res.status(400).json({ error: 'Dados incompletos para envio' });
   }
 
-  const mensagem = `🏗️ *NOVO PEDIDO - PERFIL-X* \n\n` +
-    `📄 *Contrato:* ${contrato}\n` +
-    `👷 *Encarregado:* ${encarregado}\n` +
-    `🏭 *Obra:* ${obra}\n` +
-    `📋 *Solicitante:* ${solicitante}\n\n` +
-    `📦 *Materiais:*\n${materiais.map(item =>
-      `▸ ${item.nome}: ${item.quantidade} ${item.unidade || 'un'}`
-    ).join('\n')}`;
+  const TOKEN = '7676057131:AAELLtx8nzc4F1_PbMGxE-7R3sCvM1lufdM';
+  const CHAT_ID = '-4765938730';
+
+  // Montar a mensagem
+  let mensagem = `📦 *Novo Pedido de Materiais*\n\n`;
+  mensagem += `*Contrato:* ${contrato}\n`;
+  mensagem += `*Encarregado:* ${encarregado}\n`;
+  mensagem += `*Obra:* ${obra}\n`;
+  mensagem += `*Solicitante:* ${solicitante}\n\n`;
+  mensagem += `*Materiais:*\n`;
+
+  materiais.forEach((item, index) => {
+    mensagem += `• ${item.nome} - ${item.quantidade} ${item.unidade}\n`;
+  });
 
   try {
-    await bot.sendMessage(chatId, mensagem, { parse_mode: 'Markdown' });
+    const telegramRes = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: mensagem,
+        parse_mode: 'Markdown'
+      })
+    });
+
+    if (!telegramRes.ok) {
+      const text = await telegramRes.text();
+      throw new Error(`Erro Telegram: ${text}`);
+    }
+
     res.status(200).json({ success: true });
-  } catch (error) {
-    console.error('Erro ao enviar mensagem:', error.message);
-    res.status(500).json({ error: 'Erro ao enviar mensagem' });
+  } catch (err) {
+    console.error('❌ Erro no envio:', err);
+    res.status(500).json({ error: 'Erro ao enviar pedido ao Telegram' });
   }
 }
