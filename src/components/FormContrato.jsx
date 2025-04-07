@@ -88,8 +88,14 @@ const FormContainer = styled.div`
   padding: 2rem;
   border-radius: ${({ theme }) => theme.borderRadius};
   border: 1px solid ${({ theme }) => theme.colors.accentBlue};
-  
+  max-width: 600px;
+  margin: 0 auto;
+
+  @media (max-width: 600px) {
+    padding: 1rem;
+  }
 `;
+
 
 const FormTitle = styled.h2`
   color: ${({ theme }) => theme.colors.accentBlue};
