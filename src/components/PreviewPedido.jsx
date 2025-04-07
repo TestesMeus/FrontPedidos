@@ -8,8 +8,8 @@ const PreviewPedido = ({ formData, itens, voltar, removerItem }) => {
     window.location.reload();
   };
   
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://pedidos-marica.vercel.app/api';
-  
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://backpedidos.onrender.com/api';
+
   const enviarParaTelegram = async () => {
     try {
       const response = await fetch(`${API_URL}/enviar-pedido`, {
