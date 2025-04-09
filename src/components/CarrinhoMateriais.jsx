@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { FaSearch } from "react-icons/fa";
 
 const CarrinhoMateriais = ({
   categoria,
@@ -7,9 +8,10 @@ const CarrinhoMateriais = ({
   materiais,
   adicionarItem,
   nextStep,
-  voltar
+  voltar,
 }) => {
   const [quantidades, setQuantidades] = useState({});
+  const [busca, setBusca] = useState("");
 
   const handleQuantidadeChange = (itemId, value) => {
     setQuantidades((prev) => ({
@@ -31,22 +33,37 @@ const CarrinhoMateriais = ({
     }
   };
 
+  const materiaisFiltrados = materiais.filter((item) =>
+    item.nome.toLowerCase().includes(busca.toLowerCase())
+  );
+
   return (
     <CarrinhoContainer>
       <CarrinhoTitle>Materiais - {categoria}</CarrinhoTitle>
+
       <TopBar>
-  <VoltarButton onClick={voltar}>← Voltar</VoltarButton>
-  <CategoriaSelect
-    value={categoria}
-    onChange={(e) => setCategoria(e.target.value)}
-  >
-    <option value="CIVIL">Civil</option>
-    <option value="PINTURA">Pintura</option>
-  </CategoriaSelect>
-</TopBar>
+        <VoltarButton onClick={voltar}>← Voltar</VoltarButton>
+        <CategoriaSelect
+          value={categoria}
+          onChange={(e) => setCategoria(e.target.value)}
+        >
+          <option value="CIVIL">Civil</option>
+          <option value="PINTURA">Pintura</option>
+        </CategoriaSelect>
+      </TopBar>
+
+      <BuscaContainer>
+        <FaSearch />
+        <BuscaInput
+          type="text"
+          placeholder="Buscar material..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+        />
+      </BuscaContainer>
 
       <MateriaisList>
-        {materiais.map((item) => (
+        {materiaisFiltrados.map((item) => (
           <MaterialItem key={item.id}>
             <MaterialForm onSubmit={(e) => handleAdicionarItem(e, item)}>
               <MaterialName>
@@ -79,7 +96,7 @@ const CarrinhoMateriais = ({
   );
 };
 
-// Estilos com styled-components
+// Estilos
 const CarrinhoContainer = styled.div`
   background-color: ${({ theme }) => theme.colors.secondaryDark};
   padding: 2rem;
@@ -99,14 +116,12 @@ const CategoriaSelect = styled.select`
   border-radius: ${({ theme }) => theme.borderRadius};
   color: ${({ theme }) => theme.colors.textLight};
   font-size: 1rem;
-  appearance: none; /* Remove o estilo padrão do sistema */
-  -webkit-appearance: none; /* Para navegadores baseados no WebKit (Chrome, Safari) */
-  -moz-appearance: none; /* Para Firefox */
+  appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23a7c5eb'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1.5rem;
-  padding-right: 2.5rem; /* Espaço para a seta */
+  padding-right: 2.5rem;
 
   &:focus {
     outline: none;
@@ -114,16 +129,41 @@ const CategoriaSelect = styled.select`
     background-color: rgba(255, 255, 255, 0.15);
   }
 
-  /* Estilo para as opções */
   option {
     background-color: ${({ theme }) => theme.colors.secondaryDark};
     color: ${({ theme }) => theme.colors.textLight};
   }
 
-  /* Remove o fundo azul padrão no Chrome quando selecionado */
   &:focus option:checked {
     background: ${({ theme }) => theme.colors.accentBlue};
     color: ${({ theme }) => theme.colors.primaryDark};
+  }
+`;
+
+const BuscaContainer = styled.div`
+  display: flex;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid ${({ theme }) => theme.colors.accentBlue};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+  color: ${({ theme }) => theme.colors.textLight};
+`;
+
+const BuscaInput = styled.input`
+  border: none;
+  background: transparent;
+  color: ${({ theme }) => theme.colors.textLight};
+  margin-left: 0.5rem;
+  flex: 1;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: ${({ theme }) => theme.colors.textMuted};
   }
 `;
 
@@ -153,7 +193,6 @@ const MaterialForm = styled.form`
     align-items: stretch;
   }
 `;
-
 
 const MaterialName = styled.span`
   flex: 1;
@@ -208,6 +247,7 @@ const FinalizarButton = styled.button`
     transform: translateY(-2px);
   }
 `;
+
 const VoltarButton = styled.button`
   background-color: ${({ theme }) => theme.colors.textMuted};
   color: ${({ theme }) => theme.colors.textLight};
@@ -223,6 +263,7 @@ const VoltarButton = styled.button`
     background-color: ${({ theme }) => theme.colors.warning};
   }
 `;
+
 const TopBar = styled.div`
   display: flex;
   justify-content: space-between;
@@ -230,6 +271,5 @@ const TopBar = styled.div`
   flex-wrap: wrap;
   gap: 0.5rem;
 `;
-
 
 export default CarrinhoMateriais;
