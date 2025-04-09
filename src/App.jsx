@@ -3,8 +3,9 @@ import { ThemeProvider, createGlobalStyle, styled } from 'styled-components';
 import FormContrato from './components/FormContrato';
 import CarrinhoMateriais from './components/CarrinhoMateriais';
 import PreviewPedido from './components/PreviewPedido';
+import { materiais as dataMateriais } from './data/materiais';
 
-// Tema escuro com azul pastel
+// Tema e estilos
 const theme = {
   colors: {
     primaryDark: '#1a1a2e',
@@ -24,7 +25,6 @@ const theme = {
   borderRadius: '6px'
 };
 
-// Estilos globais
 const GlobalStyle = createGlobalStyle`
   body {
     background-color: ${({ theme }) => theme.colors.primaryDark};
@@ -41,7 +41,6 @@ const GlobalStyle = createGlobalStyle`
   }
 `;
 
-// Container principal
 const AppContainer = styled.div`
   width: 100%;
   max-width: 800px;
@@ -56,22 +55,7 @@ const AppContainer = styled.div`
   }
 `;
 
-// Dados de materiais
-const materiais = {
-  CIVIL: [
-    { id: 1, nome: "Cimento CP III", unidade: "saco" },
-    { id: 2, nome: "Areia Média", unidade: "m³" },
-    { id: 3, nome: "Pedra Brita", unidade: "m³" },
-  ],
-  PINTURA: [
-    { id: 4, nome: "Tinta Acrílica", unidade: "L" },
-    { id: 5, nome: "Rolo de Lã", unidade: "un" },
-    { id: 6, nome: "Pincel Chato", unidade: "un" },
-  ]
-};
-
 function App() {
-
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     contrato: "",
@@ -79,6 +63,7 @@ function App() {
     obra: "",
     solicitante: "",
   });
+
   const [categoria, setCategoria] = useState("CIVIL");
   const [itens, setItens] = useState([]);
 
@@ -96,19 +81,19 @@ function App() {
       `👷 *Encarregado:* ${formData.encarregado}\n` +
       `🏭 *Obra:* ${formData.obra}\n` +
       `📋 *Solicitante:* ${formData.solicitante}\n\n` +
-      `📦 *Materiais:*\n${itens.map(item => 
+      `📦 *Materiais:*\n${itens.map(item =>
         `▸ ${item.nome}: ${item.quantidade} ${item.unidade || 'un'}`
       ).join('\n')}`;
-  
+
     try {
       const response = await fetch('/api/enviar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mensagem })
       });
-  
+
       if (!response.ok) throw new Error('Erro ao enviar');
-  
+
       alert('✅ Pedido enviado com sucesso!');
       setItens([]);
       setStep(1);
@@ -117,7 +102,6 @@ function App() {
       alert('❌ Falha ao enviar pedido.');
     }
   };
-  
 
   return (
     <ThemeProvider theme={theme}>
@@ -135,7 +119,8 @@ function App() {
           <CarrinhoMateriais
             categoria={categoria}
             setCategoria={setCategoria}
-            materiais={materiais[categoria]}
+            categorias={Object.keys(dataMateriais)} // ✅ Aqui está o ajuste!
+            materiais={dataMateriais[categoria] || []} // ✅ Garantindo que sempre seja um array
             adicionarItem={adicionarItem}
             nextStep={() => setStep(3)}
             voltar={() => setStep(1)}
