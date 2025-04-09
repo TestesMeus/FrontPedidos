@@ -6,6 +6,7 @@ const CarrinhoMateriais = ({
   categoria,
   setCategoria,
   materiais,
+  categorias,
   adicionarItem,
   nextStep,
   voltar,
@@ -47,8 +48,12 @@ const CarrinhoMateriais = ({
           value={categoria}
           onChange={(e) => setCategoria(e.target.value)}
         >
-          <option value="CIVIL">Civil</option>
-          <option value="PINTURA">Pintura</option>
+          {Array.isArray(categorias) &&
+            categorias.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat.charAt(0).toUpperCase() + cat.slice(1).toLowerCase()}
+              </option>
+            ))}
         </CategoriaSelect>
       </TopBar>
 
