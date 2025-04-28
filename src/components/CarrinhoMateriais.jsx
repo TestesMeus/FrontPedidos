@@ -115,7 +115,7 @@ const CarrinhoMateriais = ({
           aria-label="Ver carrinho"
           $visible={itens.length > 0}
         >
-          <FaShoppingCart size={24} />
+          <FaShoppingCart style={{ fontSize: '32px' }}/>
           {itens.length > 0 && <CartBadge>{itens.length}</CartBadge>}
         </FloatingCartButton>
       </FloatingCartWrapper>
@@ -173,8 +173,8 @@ const FloatingCartButton = styled.button`
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  background-color: ${({ theme }) => theme.colors.accentBlue};
-  color: ${({ theme }) => theme.colors.primaryDark};
+  background-color: #3d3b49;
+  color: white;
   border: none;
   display: flex;
   align-items: center;
@@ -227,10 +227,6 @@ const CartBadge = styled.span`
     height: 24px; // Aumentei de 20px para 24px
     font-size: 0.9rem; // Aumentei de 0.7rem para 0.9rem
   }
-`;
-
-const CartIcon = styled(FaShoppingCart)`
-  margin-top: 3px; // Ajuste fino para centralização vertical
 `;
 
 const CartPopup = styled.div`
