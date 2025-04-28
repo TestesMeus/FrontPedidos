@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ThemeProvider, createGlobalStyle, styled } from 'styled-components';
 import FormContrato from './components/FormContrato';
 import CarrinhoMateriais from './components/CarrinhoMateriais';
@@ -6,6 +6,7 @@ import PreviewPedido from './components/PreviewPedido';
 import Login from './components/Login';
 import { materiais as dataMateriais } from './data/materiais';
 import { usuariosValidos } from './data/users'; // Importando usuários válidos
+
 
 // Tema e estilos
 const theme = {
@@ -78,6 +79,21 @@ const AppContainer = styled.div`
   }
 `;
 
+const LogoutButton = styled.button`
+  background-color: ${({ theme }) => theme.colors.error};
+  color: white;
+  border: none;
+  padding: ${({ theme }) => theme.spacing.small};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  cursor: pointer;
+  font-weight: bold;
+  margin-bottom: ${({ theme }) => theme.spacing.medium};
+  
+  &:hover {
+    background-color: darkred;
+  }
+`;
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [usuarioLogado, setUsuarioLogado] = useState('');
@@ -92,6 +108,25 @@ function App() {
   const [categoria, setCategoria] = useState("CIVIL");
   const [itens, setItens] = useState([]);
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem('usuarioLogado');
+    if (storedUser) {
+      const { username, expiry } = JSON.parse(storedUser);
+      const now = new Date();
+      if (now.getTime() < expiry) {
+        setIsLoggedIn(true);
+        setUsuarioLogado(username);
+        setFormData(prevFormData => ({
+          ...prevFormData,
+          encarregado: username
+        }));
+      } else {
+        localStorage.removeItem('usuarioLogado');
+      }
+    }
+  }, []);
+
+
   const adicionarItem = (item, quantidade) => {
     setItens([...itens, { ...item, quantidade: parseInt(quantidade) }]);
   };
@@ -100,7 +135,24 @@ function App() {
     setItens(prevItens => prevItens.filter((_, i) => i !== index));
   };
 
+  const dentroDoHorario = () => {
+    const agora = new Date();
+    const diaSemana = agora.getDay(); // 0 = domingo, 6 = sábado
+    const hora = agora.getHours(); // 0-23
+  
+    const diaUtil = diaSemana >= 1 && diaSemana <= 5; // Segunda a sexta
+    const horarioPermitido = hora >= 7 && hora < 16; // das 7h00 até 15h59
+  
+    return diaUtil && horarioPermitido;
+  };
+  
+
   const enviarParaTelegram = async () => {
+    if (!dentroDoHorario()) {
+      alert('❌ Pedidos só podem ser feitos de segunda a sexta das 7h às 16h!');
+      return;
+    }
+  
     const mensagem = `🏗️ *PEDIDO PERFIL-X* \n\n` +
       `📄 *Contrato:* ${formData.contrato}\n` +
       `👷 *Encarregado:* ${formData.encarregado}\n` +
@@ -110,21 +162,21 @@ function App() {
       `📦 *Materiais:*\n${itens.map(item =>
         `▸ ${item.nome}: ${item.quantidade} ${item.unidade || 'un'}`
       ).join('\n')}`;
-
+  
     try {
       const response = await fetch('/api/enviar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ mensagem })
       });
-
+  
       if (!response.ok) throw new Error('Erro ao enviar');
-
+  
       alert('✅ Pedido enviado com sucesso!');
       setItens([]);
       setFormData({
         contrato: "",
-        encarregado: usuarioLogado, // <-- Encarregado mantém o usuário logado!
+        encarregado: usuarioLogado,
         obra: "",
         solicitante: "",
         os: ""
@@ -136,20 +188,55 @@ function App() {
     }
   };
 
+
+
+  const usuariosSemRestricao = ['admin', 'lorrana']
+
+
+
   const handleLogin = (username, password) => {
     const usuario = usuariosValidos[username];
-
-    if (usuario && usuario.senha === password) { 
+  
+    if (usuario && usuario.senha === password) {
+      // Se NÃO for admin, verifica o horário
+      if (!usuariosSemRestricao.includes(username) && !dentroDoHorario()) {
+        alert('⏰ Login só é permitido de segunda a sexta das 7h às 16h!');
+        return;
+      }
+  
       setIsLoggedIn(true);
-      setUsuarioLogado(username);
+      setUsuarioLogado(usuario.nome);
+  
+      const now = new Date();
+      const expiryTime = now.getTime() + 60 * 60 * 1000; // 1 hora
+      localStorage.setItem('usuarioLogado', JSON.stringify({ username: usuario.nome, expiry: expiryTime }));
+  
       setFormData(prevFormData => ({
         ...prevFormData,
-        encarregado: usuario.nome // <-- Preenche o nome do encarregado após o login!
+        encarregado: usuario.nome
       }));
+  
     } else {
       alert('Usuário ou senha inválidos!');
     }
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('usuarioLogado');
+    setIsLoggedIn(false);
+    setUsuarioLogado('');
+    setFormData({
+      contrato: "",
+      encarregado: "",
+      obra: "",
+      solicitante: "",
+      os: ""
+    });
+    setItens([]);
+    setStep(1);
+  };
+
+
 
   if (!isLoggedIn) {
     return (
@@ -164,6 +251,10 @@ function App() {
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <AppContainer>
+
+      <LogoutButton onClick={handleLogout}>
+    Sair
+  </LogoutButton>
         {step === 1 && (
           <FormContrato
             formData={formData}
