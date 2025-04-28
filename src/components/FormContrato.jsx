@@ -16,7 +16,7 @@ const FormContrato = ({ formData, setFormData, nextStep }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (formData.contrato && formData.encarregado && formData.obra && formData.solicitante) {
+    if (formData.contrato && formData.encarregado && formData.obra && formData.solicitante && formData.os) {
       nextStep();
     }
   };
@@ -76,6 +76,18 @@ const FormContrato = ({ formData, setFormData, nextStep }) => {
           />
         </FormGroup>
 
+        <FormGroup>
+          <Label>Ordem de Serviço*:</Label>
+          <Input
+            type="number"
+            name="os"
+            value={formData.os}
+            onChange={handleChange}
+            placeholder="N° Ordem de Serviço"
+            required
+          />
+        </FormGroup>
+
         <NextButton type="submit">Próximo → Selecionar Materiais</NextButton>
       </StyledForm>
     </FormContainer>
@@ -93,6 +105,11 @@ const FormContainer = styled.div`
 
   @media (max-width: 600px) {
     padding: 1rem;
+  }
+  @media (max-width: 480px) {
+    padding: 1rem 0.5rem;
+    border: none;
+    background-color: transparent;
   }
 `;
 
@@ -130,11 +147,15 @@ const Input = styled.input`
   border-radius: ${({ theme }) => theme.borderRadius};
   color: ${({ theme }) => theme.colors.textLight};
   font-size: 1rem;
+  min-height: 44px;
 
   &:focus {
     outline: none;
     border-color: ${({ theme }) => theme.colors.textLight};
     background-color: rgba(255, 255, 255, 0.15);
+  }
+  @media (max-width: 480px) {
+    width: 100%;
   }
 `;
 
@@ -153,11 +174,15 @@ const Select = styled.select`
   background-position: right 0.75rem center;
   background-size: 1.5rem;
   padding-right: 2.5rem; /* Espaço para a seta */
+  min-height: 50px;
 
   &:focus {
     outline: none;
     border-color: ${({ theme }) => theme.colors.textLight};
     background-color: rgba(255, 255, 255, 0.15);
+  }
+  @media (max-width: 480px) {
+    width: 100%;
   }
 
   /* Estilo para as opções */
@@ -174,7 +199,7 @@ const Select = styled.select`
 `;
 
 const NextButton = styled.button`
-  background-color: ${({ theme }) => theme.colors.accentBlue};
+  background-color: ${({ theme }) => theme.colors.success};
   color: ${({ theme }) => theme.colors.primaryDark};
   border: none;
   padding: 0.75rem;

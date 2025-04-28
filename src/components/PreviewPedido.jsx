@@ -24,6 +24,7 @@ const enviarParaTelegram = async () => {
         encarregado: formData.encarregado,
         obra: formData.obra,
         solicitante: formData.solicitante,
+        os: formData.os,
         materiais: itens
       })
     });
@@ -62,6 +63,11 @@ const enviarParaTelegram = async () => {
       <InfoGroup>
         <InfoLabel>Solicitante:</InfoLabel>
         <InfoValue>{formData.solicitante}</InfoValue>
+      </InfoGroup>
+
+      <InfoGroup>
+        <InfoLabel>OS:</InfoLabel>
+        <InfoValue>{formData.os}</InfoValue>
       </InfoGroup>
 
       <MateriaisTitle>Materiais:</MateriaisTitle>
@@ -108,6 +114,11 @@ const PreviewContainer = styled.div`
   overflow-x: auto;
   max-width: 100%;
   box-sizing: border-box;
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border: none;
+    background-color: transparent;
+  }
 `;
 
 const PreviewTitle = styled.h2`
@@ -161,6 +172,11 @@ const MaterialPreview = styled.div`
   &:last-child {
     border-bottom: none;
   }
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 `;
 
 const MaterialInfo = styled.div`
@@ -188,6 +204,8 @@ const DeleteButton = styled.button`
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
+  min-height: 44px;
+  min-width: 44px;
 
   &:hover {
     color: ${({ theme }) => theme.colors.warning};
@@ -196,6 +214,9 @@ const DeleteButton = styled.button`
 
   &:active {
     transform: scale(0.95);
+  }
+  @media (max-width: 480px) {
+    align-self: flex-end;
   }
 `;
 
@@ -212,7 +233,7 @@ const BotoesContainer = styled.div`
 
 
 const VoltarButton = styled.button`
-  background-color: ${({ theme }) => theme.colors.textMuted};
+  background-color: red;
   color: ${({ theme }) => theme.colors.textLight};
   border: none;
   padding: 0.75rem 1.5rem;
@@ -237,6 +258,7 @@ const ConfirmarButton = styled.button`
   font-weight: 600;
   flex: 2;
   transition: all 0.3s ease;
+  min-height: 50px;
 
   &:hover:not(:disabled) {
     background-color: #3daa58;
@@ -247,6 +269,9 @@ const ConfirmarButton = styled.button`
     background-color: ${({ theme }) => theme.colors.textMuted};
     cursor: not-allowed;
     opacity: 0.7;
+  }
+  @media (max-width: 480px) {
+    width: 100%;
   }
 `;
 

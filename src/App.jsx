@@ -37,21 +37,42 @@ const GlobalStyle = createGlobalStyle`
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 1rem;
+    padding: 0.5rem;
+    font-size: 16px;
+    
+    @media (max-width: 480px) {
+      padding: 0.25rem;
+      align-items: stretch;
+    }
+  }
+  
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  input, select, textarea, button {
+    font-size: 16px;
   }
 `;
 
 const AppContainer = styled.div`
   width: 100%;
   max-width: 800px;
-  margin: 2rem;
-  padding: 2rem;
+  margin: 1rem;
+  padding: 1.5rem;
   background-color: ${({ theme }) => theme.colors.secondaryDark};
   border-radius: ${({ theme }) => theme.borderRadius};
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 
   @media (min-width: 1200px) {
     margin: 2rem auto;
+  }
+
+  @media (max-width: 480px) {
+    margin: 0.5rem;
+    padding: 1rem;
+    border-radius: 0;
   }
 `;
 
@@ -62,6 +83,7 @@ function App() {
     encarregado: "",
     obra: "",
     solicitante: "",
+    os: "" // Adicionei o campo os que estava faltando
   });
 
   const [categoria, setCategoria] = useState("CIVIL");
@@ -80,7 +102,8 @@ function App() {
       `📄 *Contrato:* ${formData.contrato}\n` +
       `👷 *Encarregado:* ${formData.encarregado}\n` +
       `🏭 *Obra:* ${formData.obra}\n` +
-      `📋 *Solicitante:* ${formData.solicitante}\n\n` +
+      `📋 *Solicitante:* ${formData.solicitante}\n` +
+      `📝 *OS:* ${formData.os}\n\n` + // Adicionei a OS na mensagem
       `📦 *Materiais:*\n${itens.map(item =>
         `▸ ${item.nome}: ${item.quantidade} ${item.unidade || 'un'}`
       ).join('\n')}`;
@@ -96,6 +119,13 @@ function App() {
 
       alert('✅ Pedido enviado com sucesso!');
       setItens([]);
+      setFormData({
+        contrato: "",
+        encarregado: "",
+        obra: "",
+        solicitante: "",
+        os: ""
+      });
       setStep(1);
     } catch (error) {
       console.error('Erro:', error);
@@ -115,17 +145,19 @@ function App() {
           />
         )}
 
-        {step === 2 && (
-          <CarrinhoMateriais
-            categoria={categoria}
-            setCategoria={setCategoria}
-            categorias={Object.keys(dataMateriais)} // ✅ Aqui está o ajuste!
-            materiais={dataMateriais[categoria] || []} // ✅ Garantindo que sempre seja um array
-            adicionarItem={adicionarItem}
-            nextStep={() => setStep(3)}
-            voltar={() => setStep(1)}
-          />
-        )}
+{step === 2 && (
+  <CarrinhoMateriais
+    categoria={categoria}
+    setCategoria={setCategoria}
+    categorias={Object.keys(dataMateriais)}
+    materiais={dataMateriais[categoria] || []}
+    adicionarItem={adicionarItem}
+    nextStep={() => setStep(3)}
+    voltar={() => setStep(1)}
+    itens={itens}     
+    removerItem={removerItem}  
+  />
+)}
 
         {step === 3 && (
           <PreviewPedido
