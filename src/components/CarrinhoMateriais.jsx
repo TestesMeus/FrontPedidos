@@ -173,7 +173,7 @@ const FloatingCartButton = styled.button`
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  background-color: #3d3b49;
+  background-color: #1a0d8d;
   color: white;
   border: none;
   display: flex;

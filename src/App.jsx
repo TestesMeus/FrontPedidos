@@ -3,7 +3,9 @@ import { ThemeProvider, createGlobalStyle, styled } from 'styled-components';
 import FormContrato from './components/FormContrato';
 import CarrinhoMateriais from './components/CarrinhoMateriais';
 import PreviewPedido from './components/PreviewPedido';
+import Login from './components/Login';
 import { materiais as dataMateriais } from './data/materiais';
+import { usuariosValidos } from './data/users'; // Importando usuários válidos
 
 // Tema e estilos
 const theme = {
@@ -39,7 +41,7 @@ const GlobalStyle = createGlobalStyle`
     align-items: flex-start;
     padding: 0.5rem;
     font-size: 16px;
-    
+
     @media (max-width: 480px) {
       padding: 0.25rem;
       align-items: stretch;
@@ -77,15 +79,16 @@ const AppContainer = styled.div`
 `;
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [usuarioLogado, setUsuarioLogado] = useState('');
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     contrato: "",
     encarregado: "",
     obra: "",
     solicitante: "",
-    os: "" // Adicionei o campo os que estava faltando
+    os: ""
   });
-
   const [categoria, setCategoria] = useState("CIVIL");
   const [itens, setItens] = useState([]);
 
@@ -103,7 +106,7 @@ function App() {
       `👷 *Encarregado:* ${formData.encarregado}\n` +
       `🏭 *Obra:* ${formData.obra}\n` +
       `📋 *Solicitante:* ${formData.solicitante}\n` +
-      `📝 *OS:* ${formData.os}\n\n` + // Adicionei a OS na mensagem
+      `📝 *OS:* ${formData.os}\n\n` +
       `📦 *Materiais:*\n${itens.map(item =>
         `▸ ${item.nome}: ${item.quantidade} ${item.unidade || 'un'}`
       ).join('\n')}`;
@@ -121,7 +124,7 @@ function App() {
       setItens([]);
       setFormData({
         contrato: "",
-        encarregado: "",
+        encarregado: usuarioLogado, // <-- Encarregado mantém o usuário logado!
         obra: "",
         solicitante: "",
         os: ""
@@ -133,6 +136,30 @@ function App() {
     }
   };
 
+  const handleLogin = (username, password) => {
+    const usuario = usuariosValidos[username];
+
+    if (usuario && usuario.senha === password) { 
+      setIsLoggedIn(true);
+      setUsuarioLogado(username);
+      setFormData(prevFormData => ({
+        ...prevFormData,
+        encarregado: usuario.nome // <-- Preenche o nome do encarregado após o login!
+      }));
+    } else {
+      alert('Usuário ou senha inválidos!');
+    }
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <ThemeProvider theme={theme}>
+        <GlobalStyle />
+        <Login onLogin={handleLogin} />
+      </ThemeProvider>
+    );
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
@@ -142,23 +169,22 @@ function App() {
             formData={formData}
             setFormData={setFormData}
             nextStep={() => setStep(2)}
+            isLoggedIn={isLoggedIn}
           />
         )}
-
-{step === 2 && (
-  <CarrinhoMateriais
-    categoria={categoria}
-    setCategoria={setCategoria}
-    categorias={Object.keys(dataMateriais)}
-    materiais={dataMateriais[categoria] || []}
-    adicionarItem={adicionarItem}
-    nextStep={() => setStep(3)}
-    voltar={() => setStep(1)}
-    itens={itens}     
-    removerItem={removerItem}  
-  />
-)}
-
+        {step === 2 && (
+          <CarrinhoMateriais
+            categoria={categoria}
+            setCategoria={setCategoria}
+            categorias={Object.keys(dataMateriais)}
+            materiais={dataMateriais[categoria] || []}
+            adicionarItem={adicionarItem}
+            nextStep={() => setStep(3)}
+            voltar={() => setStep(1)}
+            itens={itens}
+            removerItem={removerItem}
+          />
+        )}
         {step === 3 && (
           <PreviewPedido
             formData={formData}

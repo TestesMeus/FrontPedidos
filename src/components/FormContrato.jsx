@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const FormContrato = ({ formData, setFormData, nextStep }) => {
+const FormContrato = ({ formData, setFormData, nextStep, isLoggedIn }) => {
   const contratos = [
     "117/2023 - Esporte Maricá ",
     "267/2023 - Predial Maricá",
@@ -49,6 +49,7 @@ const FormContrato = ({ formData, setFormData, nextStep }) => {
             onChange={handleChange}
             placeholder="Nome do encarregado"
             required
+            readOnly={isLoggedIn} // Aqui o campo ficará bloqueado se já estiver logado
           />
         </FormGroup>
 
@@ -93,6 +94,7 @@ const FormContrato = ({ formData, setFormData, nextStep }) => {
     </FormContainer>
   );
 };
+
 
 // Estilos com styled-components
 const FormContainer = styled.div`
