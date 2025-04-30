@@ -158,4 +158,5 @@ const Logo = styled.img`
   width: 120px;
   display: block;
   margin: 0 auto 1rem auto;
+  border-radius: 90px;
 `;
