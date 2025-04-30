@@ -206,9 +206,11 @@ function App() {
   
       setIsLoggedIn(true);
       setUsuarioLogado(usuario.nome);
-  
+
+      const TEMPO_EXPIRACAO_EM_HORAS = 2; // Aqui você muda para 2h, 4h, 8h, etc.
+
       const now = new Date();
-      const expiryTime = now.getTime() + 60 * 60 * 1000; // 1 hora
+      const expiryTime = now.getTime() + TEMPO_EXPIRACAO_EM_HORAS * 60 * 60 * 1000;
       localStorage.setItem('usuarioLogado', JSON.stringify({ username: usuario.nome, expiry: expiryTime }));
   
       setFormData(prevFormData => ({
@@ -251,10 +253,10 @@ function App() {
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <AppContainer>
-
-      <LogoutButton onClick={handleLogout}>
-    Sair
-  </LogoutButton>
+      <p>Olá, {usuarioLogado}!</p>
+        <LogoutButton onClick={handleLogout}>
+         Sair
+        </LogoutButton>
         {step === 1 && (
           <FormContrato
             formData={formData}

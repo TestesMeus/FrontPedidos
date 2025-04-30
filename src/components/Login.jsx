@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import logo from '../assets/P-X.png'
+
 
 const Login = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
     onLogin(username, password);
   };
 
+
   return (
     <LoginContainer>
       <LoginCard>
+      <Logo src={logo} alt="Logo Perfil-X" />
         <Title>Login - Perfil-X Construtora</Title>
         <StyledForm onSubmit={handleLogin}>
           <FormGroup>
@@ -27,15 +33,21 @@ const Login = ({ onLogin }) => {
           </FormGroup>
 
           <FormGroup>
-            <Label>Senha:</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Digite sua senha"
-              required
-            />
-          </FormGroup>
+  <Label>Senha:</Label>
+  <PasswordWrapper>
+    <Input
+      type={showPassword ? 'text' : 'password'}
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      placeholder="Digite sua senha"
+      required
+    />
+    <ToggleButton type="button" onClick={() => setShowPassword(!showPassword)}>
+    {showPassword ? <FaEyeSlash /> : <FaEye />}
+    </ToggleButton>
+  </PasswordWrapper>
+</FormGroup>
+
 
           <LoginButton type="submit">Entrar</LoginButton>
         </StyledForm>
@@ -116,4 +128,34 @@ const LoginButton = styled.button`
     background-color: ${({ theme }) => theme.colors.textLight};
     transform: translateY(-2px);
   }
+`;
+
+const PasswordWrapper = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+`;
+
+const ToggleButton = styled.button`
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: ${({ theme }) => theme.colors.textLight};
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.accentBlue};
+  }
+`;
+
+const Logo = styled.img`
+  width: 120px;
+  display: block;
+  margin: 0 auto 1rem auto;
 `;
