@@ -51,6 +51,23 @@ const Login = ({ onLogin }) => {
 
           <LoginButton type="submit">Entrar</LoginButton>
         </StyledForm>
+        <ExtraLinks>
+  <LinkHref
+    href="https://wa.me/5521964613139?text=Oi%2C%20preciso%20de%20um%20cadastro%20para%20realizar%20pedidos."
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Cadastro
+  </LinkHref>
+
+  <LinkHref
+    href="https://wa.me/5521964613139?text=Ol%C3%A1%2C%20esqueci%20a%20minha%20senha%2C%20pode%20me%20ajudar%20%3F"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    Esqueci a senha
+  </LinkHref>
+</ExtraLinks>
       </LoginCard>
     </LoginContainer>
   );
@@ -159,4 +176,23 @@ const Logo = styled.img`
   display: block;
   margin: 0 auto 1rem auto;
   border-radius: 90px;
+`;
+
+const ExtraLinks = styled.div`
+  margin-top: 1rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const LinkHref = styled.a`
+  color: ${({ theme }) => theme.colors.accentBlue};
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.textLight};
+  }
 `;

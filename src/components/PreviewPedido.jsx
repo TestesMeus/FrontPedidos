@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+
 import styled from 'styled-components';
 import { FaTrashAlt } from 'react-icons/fa';
 
 const PreviewPedido = ({ formData, itens, voltar, removerItem }) => {
+  const [observacao, setObservacao] = useState('');
+const [anexo, setAnexo] = useState(null);
   
   const resetarFluxo = () => {
     window.location.reload();
@@ -12,21 +15,26 @@ const API_URL = '/api/enviar-pedido'
 console.log('🔍 API_URL usada:', API_URL);
 
 const enviarParaTelegram = async () => {
+  const formDataToSend = new FormData();
+
+  formDataToSend.append('contrato', formData.contrato);
+  formDataToSend.append('encarregado', formData.encarregado);
+  formDataToSend.append('obra', formData.obra);
+  formDataToSend.append('solicitante', formData.solicitante);
+  formDataToSend.append('os', formData.os);
+  formDataToSend.append('materiais', JSON.stringify(itens));
+  formDataToSend.append('observacao', observacao);
+  if (anexo) {
+    formDataToSend.append('anexo', anexo);
+  }
+
   try {
     const response = await fetch(`${API_URL}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'PRe' // Chave deve ser igual à do servidor
+        'Authorization': 'PRe' // Apenas Authorization, sem Content-Type com FormData
       },
-      body: JSON.stringify({
-        contrato: formData.contrato,
-        encarregado: formData.encarregado,
-        obra: formData.obra,
-        solicitante: formData.solicitante,
-        os: formData.os,
-        materiais: itens
-      })
+      body: formDataToSend
     });
 
     const data = await response.json();
@@ -40,6 +48,7 @@ const enviarParaTelegram = async () => {
     alert('❌ Erro na conexão: ' + error.message);
   }
 };
+
 
   return (
     <PreviewContainer>
@@ -89,6 +98,30 @@ const enviarParaTelegram = async () => {
           </MaterialPreview>
         ))}
       </MateriaisList>
+      <InfoGroup>
+  <InfoLabel>Observações:</InfoLabel>
+  <TextArea
+    placeholder="Digite observações adicionais..."
+    value={observacao}
+    onChange={(e) => setObservacao(e.target.value)}
+  />
+</InfoGroup>
+
+<InfoGroup>
+  <InfoLabel>Anexos (imagens):</InfoLabel>
+  <FileInputWrapper>
+    <FileLabel htmlFor="fileUpload">
+      <ClipIcon>📎</ClipIcon> Selecionar imagem
+    </FileLabel>
+    <FileInput
+      id="fileUpload"
+      type="file"
+      accept="image/*"
+      onChange={(e) => setAnexo(e.target.files[0])}
+    />
+    {anexo && <FileName>{anexo.name}</FileName>}
+  </FileInputWrapper>
+</InfoGroup>
 
       <BotoesContainer>
         <VoltarButton onClick={voltar}>
@@ -276,3 +309,54 @@ const ConfirmarButton = styled.button`
 `;
 
 export default PreviewPedido;
+
+const TextArea = styled.textarea`
+  resize: vertical;
+  padding: 0.75rem;
+  border-radius: ${({ theme }) => theme.borderRadius};
+  border: 1px solid ${({ theme }) => theme.colors.accentBlue};
+  background-color: rgba(255, 255, 255, 0.1);
+  color: ${({ theme }) => theme.colors.textLight};
+  min-height: 80px;
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.textLight};
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+`;
+
+const FileInputWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const FileLabel = styled.label`
+  display: inline-flex;
+  align-items: center;
+  background-color: ${({ theme }) => theme.colors.accentBlue};
+  color: ${({ theme }) => theme.colors.primaryDark};
+  padding: 0.5rem 1rem;
+  border-radius: ${({ theme }) => theme.borderRadius};
+  cursor: pointer;
+  font-weight: bold;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.textLight};
+  }
+`;
+
+const ClipIcon = styled.span`
+  margin-right: 8px;
+`;
+
+const FileInput = styled.input`
+  display: none;
+`;
+
+const FileName = styled.span`
+  font-size: 0.9rem;
+  color: ${({ theme }) => theme.colors.textLight};
+`;
+
