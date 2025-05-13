@@ -1,10 +1,10 @@
 import formidable from 'formidable';
 import fs from 'fs';
-import path from 'path';
+import FormData from 'form-data';
 
 export const config = {
   api: {
-    bodyParser: false, // Importante para usar `formidable`
+    bodyParser: false, // necessário para o formidable funcionar
   },
 };
 
@@ -17,8 +17,8 @@ export default async function handler(req, res) {
 
   form.parse(req, async (err, fields, files) => {
     if (err) {
-      console.error('Erro ao processar formulário:', err);
-      return res.status(500).json({ error: 'Erro ao processar dados' });
+      console.error('❌ Erro ao processar formulário:', err);
+      return res.status(500).json({ error: 'Erro ao processar dados do formulário' });
     }
 
     const { contrato, encarregado, obra, solicitante, os, observacao } = fields;
@@ -26,8 +26,9 @@ export default async function handler(req, res) {
 
     try {
       materiais = JSON.parse(fields.materiais);
-    } catch {
-      return res.status(400).json({ error: 'Materiais inválidos' });
+    } catch (e) {
+      console.error('❌ Erro ao parsear materiais:', e);
+      return res.status(400).json({ error: 'Materiais inválidos (JSON malformado)' });
     }
 
     if (!contrato || !encarregado || !obra || !solicitante || !materiais || materiais.length === 0) {
@@ -37,7 +38,7 @@ export default async function handler(req, res) {
     const TOKEN = '7676057131:AAELLtx8nzc4F1_PbMGxE-7R3sCvM1lufdM';
     const CHAT_ID = '-4765938730';
 
-    // 🧾 Montar mensagem
+    // 🧾 Montar a mensagem
     let mensagem = `📦 *Novo Pedido de Materiais*\n\n`;
     mensagem += `*Contrato:* ${contrato}\n`;
     mensagem += `*Encarregado:* ${encarregado}\n`;
@@ -63,9 +64,12 @@ export default async function handler(req, res) {
         }),
       });
 
+      const contentType = msgRes.headers.get('content-type');
       if (!msgRes.ok) {
-        const text = await msgRes.text();
-        throw new Error(`Erro ao enviar mensagem: ${text}`);
+        const errorText = contentType?.includes('application/json')
+          ? await msgRes.json()
+          : await msgRes.text();
+        throw new Error(`Erro ao enviar mensagem: ${JSON.stringify(errorText)}`);
       }
 
       // Se houver imagem, envia separadamente
@@ -80,17 +84,21 @@ export default async function handler(req, res) {
         const uploadRes = await fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, {
           method: 'POST',
           body: formData,
+          headers: formData.getHeaders(),
         });
 
+        const uploadType = uploadRes.headers.get('content-type');
         if (!uploadRes.ok) {
-          const text = await uploadRes.text();
-          throw new Error(`Erro ao enviar imagem: ${text}`);
+          const errorText = uploadType?.includes('application/json')
+            ? await uploadRes.json()
+            : await uploadRes.text();
+          throw new Error(`Erro ao enviar imagem: ${JSON.stringify(errorText)}`);
         }
       }
 
       res.status(200).json({ success: true });
     } catch (err) {
-      console.error('❌ Erro ao enviar para o Telegram:', err);
+      console.error('❌ Erro ao enviar para o Telegram:', err.message);
       res.status(500).json({ error: 'Erro ao enviar pedido ao Telegram' });
     }
   });

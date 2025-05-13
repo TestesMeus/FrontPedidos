@@ -147,47 +147,49 @@ function App() {
   };
   
 
-  const enviarParaTelegram = async () => {
-    if (!dentroDoHorario()) {
-      alert('❌ Pedidos só podem ser feitos de segunda a sexta das 7h às 16h!');
-      return;
-    }
-  
-    const mensagem = `🏗️ *PEDIDO PERFIL-X* \n\n` +
-      `📄 *Contrato:* ${formData.contrato}\n` +
-      `👷 *Encarregado:* ${formData.encarregado}\n` +
-      `🏭 *Obra:* ${formData.obra}\n` +
-      `📋 *Solicitante:* ${formData.solicitante}\n` +
-      `📝 *OS:* ${formData.os}\n\n` +
-      `📦 *Materiais:*\n${itens.map(item =>
-        `▸ ${item.nome}: ${item.quantidade} ${item.unidade || 'un'}`
-      ).join('\n')}`;
-  
-    try {
-      const response = await fetch('/api/enviar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mensagem })
-      });
-  
-      if (!response.ok) throw new Error('Erro ao enviar');
-  
-      alert('✅ Pedido enviado com sucesso!');
-      setItens([]);
-      setFormData({
-        contrato: "",
-        encarregado: usuarioLogado,
-        obra: "",
-        solicitante: "",
-        os: ""
-      });
-      setStep(1);
-    } catch (error) {
-      console.error('Erro:', error);
-      alert('❌ Falha ao enviar pedido.');
-    }
-  };
+const enviarParaTelegram = async (anexoFile) => {
+  if (!dentroDoHorario()) {
+    alert('❌ Pedidos só podem ser feitos de segunda a sexta das 7h às 16h!');
+    return;
+  }
 
+  const formDataEnvio = new FormData();
+  formDataEnvio.append('contrato', formData.contrato);
+  formDataEnvio.append('encarregado', formData.encarregado);
+  formDataEnvio.append('obra', formData.obra);
+  formDataEnvio.append('solicitante', formData.solicitante);
+  formDataEnvio.append('os', formData.os || '');
+  formDataEnvio.append('observacao', formData.observacao || '');
+  formDataEnvio.append('materiais', JSON.stringify(itens));
+
+  if (anexoFile) {
+    formDataEnvio.append('anexo', anexoFile);
+  }
+
+  try {
+    const response = await fetch('/api/enviar', {
+      method: 'POST',
+      body: formDataEnvio,
+    });
+
+    if (!response.ok) throw new Error('Erro ao enviar');
+
+    alert('✅ Pedido enviado com sucesso!');
+    setItens([]);
+    setFormData({
+      contrato: "",
+      encarregado: usuarioLogado,
+      obra: "",
+      solicitante: "",
+      os: "",
+      observacao: ""
+    });
+    setStep(1);
+  } catch (error) {
+    console.error('Erro:', error);
+    alert('❌ Falha ao enviar pedido.');
+  }
+};
 
 
   const usuariosSemRestricao = ['admin', 'lorrana']
