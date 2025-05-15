@@ -1,105 +1,48 @@
-import formidable from 'formidable';
-import fs from 'fs';
-import FormData from 'form-data';
-
-export const config = {
-  api: {
-    bodyParser: false, // necessário para o formidable funcionar
-  },
-};
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
-  const form = new formidable.IncomingForm({ keepExtensions: true });
+  const { contrato, encarregado, obra, solicitante, os, materiais } = req.body;
 
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      console.error('❌ Erro ao processar formulário:', err);
-      return res.status(500).json({ error: 'Erro ao processar dados do formulário' });
-    }
+  if (!contrato || !encarregado || !obra || !solicitante || !materiais || materiais.length === 0) {
+    return res.status(400).json({ error: 'Dados incompletos para envio' });
+  }
 
-    const { contrato, encarregado, obra, solicitante, os, observacao } = fields;
-    let materiais;
+  const TOKEN = '7676057131:AAELLtx8nzc4F1_PbMGxE-7R3sCvM1lufdM';
+  const CHAT_ID = '-4765938730';
 
-    try {
-      materiais = JSON.parse(fields.materiais);
-    } catch (e) {
-      console.error('❌ Erro ao parsear materiais:', e);
-      return res.status(400).json({ error: 'Materiais inválidos (JSON malformado)' });
-    }
+  let mensagem = `📦 *Novo Pedido de Materiais*\n\n`;
+  mensagem += `*Contrato:* ${contrato}\n`;
+  mensagem += `*Encarregado:* ${encarregado}\n`;
+  mensagem += `*Obra:* ${obra}\n`;
+  mensagem += `*Solicitante:* ${solicitante}\n`;
+  if (os) mensagem += `*OS:* ${os}\n`;
+  mensagem += `\n*Materiais:*\n`;
 
-    if (!contrato || !encarregado || !obra || !solicitante || !materiais || materiais.length === 0) {
-      return res.status(400).json({ error: 'Dados incompletos para envio' });
-    }
+  materiais.forEach((item) => {
+    mensagem += `• ${item.nome} - ${item.quantidade} ${item.unidade || 'un'}\n`;
+  });
 
-    const TOKEN = '7676057131:AAELLtx8nzc4F1_PbMGxE-7R3sCvM1lufdM';
-    const CHAT_ID = '-4765938730';
-
-    // 🧾 Montar a mensagem
-    let mensagem = `📦 *Novo Pedido de Materiais*\n\n`;
-    mensagem += `*Contrato:* ${contrato}\n`;
-    mensagem += `*Encarregado:* ${encarregado}\n`;
-    mensagem += `*Obra:* ${obra}\n`;
-    mensagem += `*Solicitante:* ${solicitante}\n`;
-    if (os) mensagem += `*OS:* ${os}\n`;
-    if (observacao) mensagem += `*Observação:* ${observacao}\n`;
-    mensagem += `\n*Materiais:*\n`;
-
-    materiais.forEach((item) => {
-      mensagem += `• ${item.nome} - ${item.quantidade} ${item.unidade || 'un'}\n`;
+  try {
+    const telegramRes = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: CHAT_ID,
+        text: mensagem,
+        parse_mode: 'Markdown',
+      }),
     });
 
-    try {
-      // Envia a mensagem de texto
-      const msgRes = await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: CHAT_ID,
-          text: mensagem,
-          parse_mode: 'Markdown',
-        }),
-      });
-
-      const contentType = msgRes.headers.get('content-type');
-      if (!msgRes.ok) {
-        const errorText = contentType?.includes('application/json')
-          ? await msgRes.json()
-          : await msgRes.text();
-        throw new Error(`Erro ao enviar mensagem: ${JSON.stringify(errorText)}`);
-      }
-
-      // Se houver imagem, envia separadamente
-      if (files.anexo) {
-        const fileStream = fs.createReadStream(files.anexo.filepath);
-
-        const formData = new FormData();
-        formData.append('chat_id', CHAT_ID);
-        formData.append('caption', '📎 Anexo do pedido');
-        formData.append('photo', fileStream);
-
-        const uploadRes = await fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, {
-          method: 'POST',
-          body: formData,
-          headers: formData.getHeaders(),
-        });
-
-        const uploadType = uploadRes.headers.get('content-type');
-        if (!uploadRes.ok) {
-          const errorText = uploadType?.includes('application/json')
-            ? await uploadRes.json()
-            : await uploadRes.text();
-          throw new Error(`Erro ao enviar imagem: ${JSON.stringify(errorText)}`);
-        }
-      }
-
-      res.status(200).json({ success: true });
-    } catch (err) {
-      console.error('❌ Erro ao enviar para o Telegram:', err.message);
-      res.status(500).json({ error: 'Erro ao enviar pedido ao Telegram' });
+    if (!telegramRes.ok) {
+      const text = await telegramRes.text();
+      throw new Error(`Erro ao enviar mensagem: ${text}`);
     }
-  });
+
+    res.status(200).json({ success: true });
+  } catch (err) {
+    console.error('Erro ao enviar para o Telegram:', err);
+    res.status(500).json({ error: 'Erro ao enviar pedido ao Telegram' });
+  }
 }

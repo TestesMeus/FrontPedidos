@@ -147,29 +147,26 @@ function App() {
   };
   
 
-const enviarParaTelegram = async (anexoFile) => {
+const enviarParaTelegram = async () => {
   if (!dentroDoHorario()) {
     alert('❌ Pedidos só podem ser feitos de segunda a sexta das 7h às 16h!');
     return;
   }
 
-  const formDataEnvio = new FormData();
-  formDataEnvio.append('contrato', formData.contrato);
-  formDataEnvio.append('encarregado', formData.encarregado);
-  formDataEnvio.append('obra', formData.obra);
-  formDataEnvio.append('solicitante', formData.solicitante);
-  formDataEnvio.append('os', formData.os || '');
-  formDataEnvio.append('observacao', formData.observacao || '');
-  formDataEnvio.append('materiais', JSON.stringify(itens));
-
-  if (anexoFile) {
-    formDataEnvio.append('anexo', anexoFile);
-  }
+  const payload = {
+    contrato: formData.contrato,
+    encarregado: formData.encarregado,
+    obra: formData.obra,
+    solicitante: formData.solicitante,
+    os: formData.os || '',
+    materiais: itens,
+  };
 
   try {
     const response = await fetch('/api/enviar', {
       method: 'POST',
-      body: formDataEnvio,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) throw new Error('Erro ao enviar');
@@ -181,8 +178,7 @@ const enviarParaTelegram = async (anexoFile) => {
       encarregado: usuarioLogado,
       obra: "",
       solicitante: "",
-      os: "",
-      observacao: ""
+      os: ""
     });
     setStep(1);
   } catch (error) {
